@@ -1,18 +1,18 @@
 #+ path for files 
 SRRIDs = [x.strip() for x in open('data/samples').readlines()]
-INDEX  = "ref/GCF_000633955.1_Cs_genomic"                      # reference fasta file need to be indexed with hisat2-index
-FA     = "ref/GCF_000633955.1_Cs_genomic.fna"                  # reference fasta file
-PFAM   = "/ref/analysis/References/Pfam-A.hmm"                 # pfam hmm for transdecoder
-GFF    = "ref/GCF_000633955.1_Cs_genomic.gff"                  # original gff file
-UNIPROT = "/ref/analysis/References/uniprot/uniprot-all.fasta" # uniprot for annotation
+INDEX  = "ref/echinosophora_p_pilon"                      # reference fasta file need to be indexed with hisat2-index
+FA     = "ref/echinosophora_p_pilon.fasta"                  # reference fasta file
+PFAM   = "ref/pfam/Pfam-A.hmm"                 # pfam hmm for transdecoder
+GFF    = "ref/echinosophora_p_pilon.fasta.augustus.biocode.nosharp.gff3"                  # original gff file
+UNIPROT = "ref/uniprot-all.fasta" # uniprot for annotation
 #-
 
 #+ path for softwares 
 HISAT2       = "/programs/hisat2-2.0.4/"
 STRINGTIE    = "/programs/stringtie-1.2.4.Linux_x86_64//"
 Transdecoder = "/programs/TransDecoder-3.0.0/"
-AUGUSTUS     = "/programs/augustus-3.2.2/"
-SPECIES      = "arabidopsis"
+#AUGUSTUS     = "/programs/augustus-3.2.2/"
+#SPECIES      = "maize5"
 CUFFLINK     = "/programs/cufflinks-2.2.1.Linux_x86_64/"
 SRATK        = "/programs/sratoolkit.2.7.0-ubuntu64/bin/"
 #-
@@ -20,25 +20,25 @@ SRATK        = "/programs/sratoolkit.2.7.0-ubuntu64/bin/"
 rule end:
      input : "finalout/my_csv.csv.addgene.gff3.sort.gff3.merge.all.gff3.sort.gff3","finalout/newgene.annot"
 
-rule NCBIdownload:
-     params : "{SRRID}",SRRID=SRRIDs
-     output : "{SRRID}.sra" 
-     shell  : "python2.7 ./py/ncbi_download.py {params}"
+#rule NCBIdownload:
+#     params : "{SRRID}",SRRID=SRRIDs
+#     output : "{SRRID}.sra" 
+#     shell  : "python2.7 ./py/ncbi_download.py {params}"
 
-rule fastqdump:
-     input  : "{SRRID}.sra"
-     output : "data/{SRRID}_1.fastq.gz","data/{SRRID}_2.fastq.gz" # paired_end
-     params : cmd=SRATK
-     shell  : '''{params.cmd}fastq-dump  --origfmt -I  --split-files --gzip {input}
-                 mv {wildcards.SRRID}_?.fastq.gz data/
-                 rm {input}'''
+#rule fastqdump:
+#     input  : "{SRRID}.sra"
+#     output : "data/{SRRID}_1.fastq.gz","data/{SRRID}_2.fastq.gz" # paired_end
+#     params : cmd=SRATK
+#     shell  : '''{params.cmd}fastq-dump  --origfmt -I  --split-files --gzip {input}
+#                 mv {wildcards.SRRID}_?.fastq.gz data/
+#                 rm {input}'''
 
            
 # Single end 
 rule Hisat2:
      input  : 
              #single="data/{SRRID}.fastq.gz", #single end
-             fwd="data/{SRRID}_1.fastq.gz",rev="data/{SRRID}_2.fastq.gz" # paired end 
+             fwd="data/{SRRID}_L002_R1_001.fastq.gz",rev="data/{SRRID}_L002_R2_001.fastq.gz" # paired end 
      params : ix=INDEX,cmd=HISAT2
      output : 
              "mapped/{SRRID}.pre.bam"
@@ -142,23 +142,24 @@ rule transdecoder_noiseremove:
 
 ### Augustus 
 
-rule augustus:
-     input  : "st_gff_out/all.merged.bam.stringtie.gff.fa"
-     output : "predicted/all.merged.bam.stringtie.gff.fa.augustus.gff3"
-     params : cmd=AUGUSTUS,species=SPECIES
-     shell  : "{params.cmd}/bin/augustus --species={params.species} --genemodel=complete --gff3=on --strand=forward {input} > {output}"
+#rule augustus:
+#     input  : "st_gff_out/all.merged.bam.stringtie.gff.fa"
+#     output : "predicted/all.merged.bam.stringtie.gff.fa.augustus.gff3"
+#     params : cmd=AUGUSTUS,species=SPECIES
+#     shell  : "{params.cmd}/bin/augustus --species={params.species} --genemodel=complete --gff3=on --strand=forward {input} > {output}"
 
-rule augustus_togenome:
-     input  : sgff="st_gff_out/all.merged.bam.stringtie.gff",tgff="predicted/all.merged.bam.stringtie.gff.fa.augustus.gff3"
-     output : "predicted/all.merged.bam.stringtie.gff.fa.augustus.gff3.genome.v1.gff"
-     shell  :  '''python2.7 ./py/stringtie.augustus.addcds.py {input.sgff} {input.tgff} {output}'''
+#rule augustus_togenome:
+#     input  : sgff="st_gff_out/all.merged.bam.stringtie.gff",tgff="predicted/all.merged.bam.stringtie.gff.fa.augustus.gff3"
+#     output : "predicted/all.merged.bam.stringtie.gff.fa.augustus.gff3.genome.v1.gff"
+#     shell  :  '''python2.7 ./py/stringtie.augustus.addcds.py {input.sgff} {input.tgff} {output}'''
 
 ###
 
 rule integrate:
-     input  : fa="st_gff_out/all.merged.bam.stringtie.gff.fa", ag="predicted/all.merged.bam.stringtie.gff.fa.augustus.gff3.genome.v1.gff", td="predicted/selected_mRNA_v4.gff"
+     #input  : fa="st_gff_out/all.merged.bam.stringtie.gff.fa", ag="predicted/all.merged.bam.stringtie.gff.fa.augustus.gff3.genome.v1.gff", td="predicted/selected_mRNA_v4.gff"
+     input  : fa="st_gff_out/all.merged.bam.stringtie.gff.fa", td="predicted/selected_mRNA_v4.gff"
      output : "predicted/my_csv.csv"
-     shell  : '''python2.7 ./py/integrate.py {input.fa} {input.ag} {input.td}
+     shell  : '''python2.7 ./py/integrate.py {input.fa} {input.td}
                  mv my_csv.csv predicted/'''
 
 

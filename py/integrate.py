@@ -11,14 +11,16 @@ file_stringtie_fa = sys.argv[1] #'/ref/analysis/Cre/braker/braker.try5_mario/gui
 dic_stringtie_fa = kang.Fasta2dic(file_stringtie_fa)
 
 #main_dir      = './' 
-file_ag       = sys.argv[2] #main_dir+'transcripts.fasta.augustus.ath.complete.gff3.nosharp.genome.v1.gff'
-file_td       = sys.argv[3] #main_dir+'selected_mRNA_v4.gff'
+#file_ag       = sys.argv[2] #main_dir+'transcripts.fasta.augustus.ath.complete.gff3.nosharp.genome.v1.gff'
+#file_td       = sys.argv[3] #main_dir+'selected_mRNA_v4.gff'
+file_td       = sys.argv[2]
 
-df_ag     = pd.read_csv(file_ag,sep='\t')
+
+#df_ag     = pd.read_csv(file_ag,sep='\t')
 df_td     = pd.read_csv(file_td,sep='\t')
 
-df_ag['ID'] = df_ag['Name'].apply(lambda x : x.replace('Name=',''))
-df_ag.set_index('ID',inplace=True)
+#df_ag['ID'] = df_ag['Name'].apply(lambda x : x.replace('Name=',''))
+#df_ag.set_index('ID',inplace=True)
 
 
 #df_td['ID'] = df_td['Name'].apply(lambda x : x.split('|')[0].replace('Name=',''))
@@ -30,13 +32,13 @@ with open('my_csv.csv', 'w') as f:
     print('Chromosome','source','feature','start','end','score','strand','frame','GFF3: grouping attributes','Name',sep='\t',file=f)
     for tid in tqdm(set(dic_stringtie_fa.keys())):
         b = 1
-        try:
-            sub_df = df_ag.loc[tid]
-        except KeyError:
-            b = 0 
-            pass 
-        if b == 1:
-            sub_df[['Chromosome','source','feature','start','end','score','strand','frame','GFF3: grouping attributes','Name']].to_csv(f,header=False,sep='\t') 
+        #try:
+        #    sub_df = df_ag.loc[tid]
+        #except KeyError:
+        #    b = 0 
+        #    pass 
+        #if b == 1:
+        #    sub_df[['Chromosome','source','feature','start','end','score','strand','frame','GFF3: grouping attributes','Name']].to_csv(f,header=False,sep='\t') 
         
         try:
             sub_df = df_td.loc[tid]
